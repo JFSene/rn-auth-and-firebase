@@ -5,39 +5,69 @@
  */
 
 import React, { Component } from 'react';
-import {
-  Platform,
-  StyleSheet,
-  Text,
-  View
-} from 'react-native';
-import { Header } from './src/components/common';
+import { View } from 'react-native';
+import firebase from 'firebase';
+import { Header, Spinner, Button, Card, CardSection } from './src/components/common';
+import LoginForm from './src/components/LoginForm';
 
-export default class App extends Component<{}> {
+
+export default class App extends Component {
+  state = { loggedIn: null };
+
+  componentWillMount() {
+    firebase.initializeApp({
+        apiKey: 'AIzaSyC9ikpUVaxQ4Jx-fQD8QmFUEwjrePmcoKQ',
+        authDomain: 'authapp-fde73.firebaseapp.com',
+        databaseURL: 'https://authapp-fde73.firebaseio.com',
+        projectId: 'authapp-fde73',
+        storageBucket: 'authapp-fde73.appspot.com',
+        messagingSenderId: '255778622809'
+    });
+
+    firebase.auth().onAuthStateChanged((user) => {
+      if (user) {
+        this.setState({ loggedIn: true });
+      } else {
+        this.setState({ loggedIn: false });
+      }
+    });
+  }
+  
+renderContent() {
+  switch (this.state.loggedIn) {
+    case true:
+    return (
+      <Card>
+        <CardSection>
+      <Button onPress={() => firebase.auth().signOut()}>
+          Log in
+      </Button>
+      </CardSection>
+      </Card>
+  );
+
+    case false:
+    return <LoginForm />;
+
+    default:
+    return (
+      <Card>
+        <CardSection>
+          <Spinner size="large" />
+        </CardSection>
+      </Card>
+  );
+  }
+}
   render() {
     return (
       <View>
         <Header headerText="Authentication" />
+       
+            {this.renderContent()}
+       
       </View>
     );
   }
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#F5FCFF',
-  },
-  welcome: {
-    fontSize: 20,
-    textAlign: 'center',
-    margin: 10,
-  },
-  instructions: {
-    textAlign: 'center',
-    color: '#333333',
-    marginBottom: 5,
-  },
-});
